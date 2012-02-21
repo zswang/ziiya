@@ -1,6 +1,19 @@
-var http = require('http');
-http.createServer(function (req, res) {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.end('Hello World\n');
-}).listen(80);
-console.log('Server is running');
+require('./modules/channel.js');
+require('./modules/mongo-storage.js');
+require('./modules/passport.js');
+//require('./modules/passport.js');
+//require('./modules/player.js');
+var ace = require('./lib/engine/ace-core.js');
+ace.addModule("index", function(sandbox){
+	return {
+		init: function(){
+			require('http').createServer(function(request, response){
+				sandbox.fire('request', {
+					request: request, 
+					response: response
+				});
+			}).listen(process.argv[2] || 80);
+		}
+	}
+});
+ace.start();

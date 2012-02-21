@@ -14,6 +14,6 @@ ace.addModule("index", function(sandbox){
 				});
 			}).listen(process.argv[2] || 80);
 		}
-	}
+	};
 });
 ace.start();

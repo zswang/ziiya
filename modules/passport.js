@@ -9,11 +9,10 @@ require('../lib/engine/ace-core.js').addModule("passport", function(sandbox){
 	function getPlayerMask(id, visa){
 		return (passportKey ^ parseInt(visa, 36) ^ parseInt(id, 36)).toString(36);
 	}
-
 	function createPassport(request, response, callback){
 		sandbox.log('begin createPassport');
 		var now = +new Date;
-		var url = path.join(request.connection.address().address, request.url);
+		var url = path.join(request.url);
 		var ip = request.connection.remoteAddress;
 		var visa = parseInt(Math.random() * 99999999).toString(36);
 		var id = [
@@ -32,7 +31,6 @@ require('../lib/engine/ace-core.js').addModule("passport", function(sandbox){
 			id: id,
 			visa: visa,
 			nick: id,
-
 			mask: mask,
 			/**
 			 * 来源url
@@ -83,7 +81,7 @@ require('../lib/engine/ace-core.js').addModule("passport", function(sandbox){
 	}
 	function loadPassport(id, callback){
 		sandbox.log('begin loadPassport');
-		var passport = passports[id]
+		var passport = passports[id];
 		if (passport) {
 			callback('', passport);
 		}
@@ -106,19 +104,18 @@ require('../lib/engine/ace-core.js').addModule("passport", function(sandbox){
 		var request = data.request;
 		var response = data.response;
 		var callback = data.callback;
-
 		var cookie = request.headers['cookie'] || "";
 		var m = cookie.match(/\bpassport=([^;]+)/);
-		var passport = m && querystring.parse(m[1]);
-		var player = passports[passport.id];
+		var passport = (m && querystring.parse(m[1])) || {};
+		var player = passport && passports[passport.id];
 		if (player && player.visa == passport.visa &&
 			player.mask == getPlayerMask(passport.id, passport.visa)){
 			player.passportTime = +new Date;
 			callback('', player);
 		} else {
-			if (passport.id){
+			if (passport && passport.id){
 				loadPassport(passport.id, function(err, passport){
-					if (err){
+					if (err || !passport){
 						sandbox.log(['getPassport error.', err]);
 						createPassport(request, response, callback);
 					} else {
@@ -149,9 +146,9 @@ require('../lib/engine/ace-core.js').addModule("passport", function(sandbox){
 				key: '@guid',
 				callback: function(err, value){
 					if (!err) guid = +value;
+					if (isNaN(guid)) guid = 0;
 				}
 			});
-
 			sandbox.on('getPassport', getPassport);
 			sandbox.on('getPlayer', getPlayer);
 		}

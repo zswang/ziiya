@@ -1,19 +1,18 @@
-require('./modules/channel.js');
-require('./modules/mongo-storage.js');
-require('./modules/passport.js');
-//require('./modules/passport.js');
-//require('./modules/player.js');
-var ace = require('./lib/engine/ace-core.js');
-ace.addModule("index", function(sandbox){
-	return {
-		init: function(){
-			require('http').createServer(function(request, response){
-				sandbox.fire('request', {
-					request: request, 
-					response: response
-				});
-			}).listen(process.argv[2] || 80);
-		}
-	};
-});
-ace.start();
+/**
+ * @author 王集鹄(wangjihu,http://weibo.com/zswang)
+ */
+var http = require('http');
+var event = require('./service/event');
+
+require('./service/channel.manager.js');
+require('./service/player.manager.js');
+require('./service/chat.plugin.js');
+require('./service/weibo.plugin.js');
+require('./service/player.plugin.js');
+require('./service/letter.plugin.js');
+require('./service/vote.plugin.js');
+require('./service/mongo-storage');
+
+http.createServer(function(request, response){
+    event.emit('request', request, response);
+}).listen(process.argv[2] || 80);
